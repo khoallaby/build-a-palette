@@ -2,7 +2,7 @@
 /*
 Plugin Name: Build a Palette
 Plugin URI: http://www.gabrielcosmetics.com
-Description: Build a Palette
+Description: Build a customized palette using existing swatches from other products.
 Author: Andy Nguyen
 Version: 1.0
 Author URI: http://www.whatisyourm.com
