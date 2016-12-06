@@ -10,8 +10,10 @@ Author URI: http://www.whatisyourm.com
 
 
 
+if ( ! defined( 'ABSPATH' ) )
+	exit; // Exit if accessed directly
 if( !class_exists('base_plugin') )
 	require_once( dirname( __FILE__ ) . '/lib/class.base.php' );
-require_once( dirname( __FILE__ ) . '/lib/class.gabriel.php' );
 
-add_action( 'plugins_loaded', array(gabriel::get_instance(), 'init') );
+require_once( dirname( __FILE__ ) . '/lib/class.gabriel.php' );
+add_action( 'init', array(gabriel::get_instance(), 'init') );

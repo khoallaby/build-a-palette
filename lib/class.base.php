@@ -1,4 +1,6 @@
 <?php
+if ( ! defined( 'ABSPATH' ) )
+	exit; // Exit if accessed directly
 
 abstract class base_plugin {
     private static $instance = array();
