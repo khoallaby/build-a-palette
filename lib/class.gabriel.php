@@ -42,9 +42,8 @@ class gabriel extends base_plugin {
 		global $post;
 
 		if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
-			if ( 'product' === $post->post_type ) {
+			if ( 'product' === $post->post_type )
 				wp_enqueue_script( 'custom-palette-admin-js', plugins_url( 'js/admin.js', dirname(__FILE__) ) );
-			}
 		}
 	}
 
@@ -158,18 +157,13 @@ class gabriel extends base_plugin {
 		echo '<div id="' . $this->slug . '_options" class="panel woocommerce_options_panel">';
 		echo '<div class="options_group">';
 
-		woocommerce_wp_checkbox( array(
-			'id' 		=> '_enable_renta_option',
-			'label' 	=> __( 'Enable rental option X', 'woocommerce' ),
+		woocommerce_wp_select( array(
+			'id' 		=> '_palette_product_id',
+			'label' 	=> __( 'Product to pull color palette from:', 'woocommerce' ),
+            'value'     => 'the value to be selected',
+            'options'   => $this->get_all_wc_products()
 		) );
 
-		woocommerce_wp_text_input( array(
-			'id'			=> '_text_input_y',
-			'label'			=> __( 'What is the value of Y', 'woocommerce' ),
-			'desc_tip'		=> 'true',
-			'description'	=> __( 'A handy description field', 'woocommerce' ),
-			'type' 			=> 'text',
-		) );
 
 		echo '</div></div>';
 	}
@@ -179,15 +173,8 @@ class gabriel extends base_plugin {
 	 * Save the custom fields.
 	 */
 	function save_custom_palette_option_field( $post_id ) {
-		#vard($_POST);
-		#die();
-
-		$rental_option = isset( $_POST['_enable_renta_option'] ) ? 'yes' : 'no';
-		update_post_meta( $post_id, '_enable_renta_option', $rental_option );
-
-		if ( isset( $_POST['_text_input_y'] ) ) :
-			update_post_meta( $post_id, '_text_input_y', sanitize_text_field( $_POST['_text_input_y'] ) );
-		endif;
+		if ( isset( $_POST['_palette_product_id'] ) )
+            update_post_meta( $post_id, '_palette_product_id', sanitize_text_field( $_POST['_palette_product_id'] ) );
 
 	}
 
@@ -221,6 +208,34 @@ class gabriel extends base_plugin {
 
 
 
+
+
+
+	/*************************************************
+	 * WooCommerce functions
+	 *************************************************/
+
+
+	public function get_all_wc_products() {
+
+		$args = array(
+			'post_type'      => array( 'product' ),
+			'posts_per_page' => - 1,
+			'order'          => 'ASC',
+			'orderby'        => 'post_title'
+		);
+
+		$return = array( '' => '' );
+
+		$loop = new WP_Query( $args );
+		foreach( $loop->get_posts() as $post ) {
+		    $return[$post->ID] = $post->post_title;
+        }
+        wp_reset_postdata();
+
+		return $return;
+
+    }
 
 
 
