@@ -1,0 +1,7 @@
+
+
+.product-type-custom_palette { }
+
+body.woocommerce #content div.product-type-custom_palette div.images { float: none !important; text-align: center; width: 100% !important; }
+body.woocommerce #content div.product-type-custom_palette div.images img.wp-post-image { display: inline; width: auto; }
+body.woocommerce #content div.product-type-custom_palette div.summary { float: none; width: 100%; }
