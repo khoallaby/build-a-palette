@@ -14,14 +14,13 @@ class gabriel extends base_plugin {
     }
 
     public function init() {
-	    add_action( 'admin_enqueue_scripts', array( $this, 'admin_javascript' ), 10, 1 );
-
 
 	    # Front end / product page
 	    add_action( 'wp', array( $this, 'modify_product_page' ) );
 
 
 	    # Back end / Custom product type
+	    add_action( 'admin_enqueue_scripts', array( $this, 'admin_javascript' ), 10, 1 );
 	    add_action( 'plugins_loaded', array( $this, 'register_custom_palette_product_type' ) );
 
 	    add_filter( 'product_type_selector', array( $this, 'add_custom_palette_product' ) );
@@ -37,12 +36,14 @@ class gabriel extends base_plugin {
 
 
 
+
+
 	public function admin_javascript( $hook ) {
 		global $post;
 
 		if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
 			if ( 'product' === $post->post_type ) {
-				wp_enqueue_script( 'bp-admin-js', plugins_url( 'js/admin.js', dirname(__FILE__) ) );
+				wp_enqueue_script( 'custom-palette-admin-js', plugins_url( 'js/admin.js', dirname(__FILE__) ) );
 			}
 		}
 	}
@@ -68,17 +69,19 @@ class gabriel extends base_plugin {
 		if( is_product() ) {
 			$product = wc_get_product( );
 			if( $product  && $product->product_type == $this->slug ) {
-				remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
-				add_action( 'woocommerce_before_single_product_summary', array ( $this, 'custom_palette_template' ), 30 );
-				# todo stuff
+				#remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
+				#add_action( 'woocommerce_before_single_product_summary', array ( $this, 'custom_palette_template' ), 30 );
+				remove_all_actions( 'woocommerce_product_thumbnails' );
+				remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_excerpt', 20 );
+				add_action( 'woocommerce_single_product_summary', array( $this, 'woocommerce_template_single_excerpt' ), 20 );
+				wp_enqueue_style( 'custom-palette-css', plugins_url( 'css/custom-palette.css', dirname(__FILE__) ) );
 			}
 		}
 	}
 
-	public function custom_palette_template() {
-		#require_once( dirname( __FILE__ ) . '/../templates/custom-palette.php' );
-		wc_get_template( '/custom-palette.php',$args = array(), $template_path = '', dirname( __FILE__ ) . '/../templates/' );
-	}
+	public function woocommerce_template_single_excerpt() {
+		$this->get_template('palette-colors');
+    }
 
 
 
@@ -215,6 +218,28 @@ class gabriel extends base_plugin {
 
 
 
+
+
+
+
+
+
+
+	/*************************************************
+	 * Misc functions
+	 *************************************************/
+
+
+
+
+	public function get_template( $file ) {
+		$dir = dirname( __FILE__ ) . '/../templates/';
+		#$filename = $dir . $file . '.php';
+		if( file_exists( $dir . $file . '.php' ) )
+			wc_get_template( '/' . $file . '.php',$args = array(), $template_path = '', dirname( __FILE__ ) . '/../templates/' );
+		else
+			get_template_part( 'templates/' . $file );
+	}
 
 
 }
