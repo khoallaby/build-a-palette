@@ -2,6 +2,18 @@
 
 .product-type-custom_palette { }
 
-body.woocommerce #content div.product-type-custom_palette div.images { float: none !important; text-align: center; width: 100% !important; }
-body.woocommerce #content div.product-type-custom_palette div.images img.wp-post-image { display: inline; width: auto; }
-body.woocommerce #content div.product-type-custom_palette div.summary { float: none; width: 100%; }
+body.woocommerce #content #main div.images { float: none !important; text-align: center; width: 100% !important; }
+body.woocommerce #content #main div.images img.wp-post-image { display: inline; width: auto; }
+
+
+body.woocommerce #content #main div.summary { float: none; width: 100%; }
+
+
+.custom-palette-colors { }
+.custom-palette-colors > ul { margin: 30px 0; }
+.custom-palette-colors > ul > li { display: inline-block; padding: 5px; }
+.custom-palette-colors > ul > li.ui-state-active,
+.custom-palette-colors > ul > li.ui-state-focus,
+.custom-palette-colors > ul > li.ui-state-hover { background-color: #019cdf; color: white; }
+
+
