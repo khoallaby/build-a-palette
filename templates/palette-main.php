@@ -45,4 +45,6 @@ $max_colors = 4;
         ?>
     </div>
     <?php } ?>
+
+    <div class="clear"></div>
 </div>

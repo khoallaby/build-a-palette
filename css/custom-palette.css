@@ -1,8 +1,9 @@
 
+body pre { white-space: pre !important; }
 
 .product-type-custom_palette { }
 
-body.woocommerce #content #main div.images { float: none !important; text-align: center; width: 100% !important; }
+body.woocommerce #content #main div.images { float: none !important; margin-bottom: 0; text-align: center; width: 100% !important; }
 body.woocommerce #content #main div.images img.wp-post-image { display: inline; width: auto; }
 
 
@@ -10,10 +11,14 @@ body.woocommerce #content #main div.summary { float: none; width: 100%; }
 
 
 .custom-palette-colors { }
-.custom-palette-colors > ul { margin: 30px 0; }
-.custom-palette-colors > ul > li { display: inline-block; padding: 5px; }
-.custom-palette-colors > ul > li.ui-state-active,
-.custom-palette-colors > ul > li.ui-state-focus,
-.custom-palette-colors > ul > li.ui-state-hover { background-color: #019cdf; color: white; }
+    .custom-palette-colors > ul { margin: 30px 0; }
+    .custom-palette-colors > ul > li { display: inline-block; padding: 5px 10px; }
+    .custom-palette-colors > ul > li a { color: black; }
+    .custom-palette-colors > ul > li.ui-state-active,
+    .custom-palette-colors > ul > li.ui-state-focus,
+    .custom-palette-colors > ul > li.ui-state-hover { background-color: #019cdf; }
+    .custom-palette-colors > ul > li.ui-state-active a,
+    .custom-palette-colors > ul > li.ui-state-focus a,
+    .custom-palette-colors > ul > li.ui-state-hover a { color: white !important; }
 
 
