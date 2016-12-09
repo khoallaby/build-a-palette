@@ -81,12 +81,18 @@ class gabriel extends base_plugin {
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_custom_palette_scripts' ) );
 
 
-				remove_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
-				#add_action( 'woocommerce_product_thumbnails', array( $this, 'woocommerce_show_product_thumbnails', 20 ) );
+				#remove_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
+				add_filter( 'woocommerce_single_product_image_html', array( $this, 'woocommerce_single_product_image_html' ), 10, 1 );
+				add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'woocommerce_add_hidden_fields' ) );
 			}
 		}
 	}
 
+
+
+	/*************************************************
+	 * WC Actions/filters, for modifying front end display
+	 *************************************************/
 
 	public function enqueue_custom_palette_scripts() {
 		wp_enqueue_style( 'custom-palette' );
@@ -99,11 +105,46 @@ class gabriel extends base_plugin {
     }
 
 
-    # remove
-	public function woocommerce_show_product_thumbnails() {
-		$this->get_wc_template('single-product/product-thumbnails.php');
-		#wc_get_template( 'single-product/product-thumbnails.php' );
+
+	public function woocommerce_add_hidden_fields() {
+		$max_colors = 4;
+
+		foreach( range(1, $max_colors) as $i )
+            echo '<input type="hidden" value="' . ($_REQUEST["cp_color_{$i}"] ? esc_attr($_REQUEST["cp_color_{$i}"]) : '') . '" name="cp_color_' . $i . '" />';
+        #$this->wc_get_template( 'single-product/product-thumbnails.php' );
 	}
+
+
+	public function woocommerce_single_product_image_html( $post_id ) {
+        #global $post, $product;
+        $product = new WC_Product( $post_id );
+
+		if ( has_post_thumbnail() ) {
+			$attachment_count = count( $product->get_gallery_attachment_ids() );
+			$gallery          = $attachment_count > 0 ? '[product-gallery]' : '';
+			$props            = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
+			$image            = get_the_post_thumbnail( $post->ID, apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ), array(
+				'title' => $props['title'],
+				'alt'   => $props['alt'],
+                'class' => 'custom-palette-image'
+			) );
+
+			return $image;
+			/*
+			return sprintf(
+				'<a href="%s" itemprop="image" class="woocommerce-main-image zoom" title="%s" data-rel="prettyPhoto%s">%s</a>',
+				esc_url( $props['url'] ),
+				esc_attr( $props['caption'] ),
+				$gallery,
+				$image
+			);
+			*/
+		} else {
+            return sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) );
+        }
+	}
+
+
 
 
 	public function woocommerce_display_swatches( $product_id ) {
@@ -241,7 +282,7 @@ class gabriel extends base_plugin {
 
 		?><script type='text/javascript'>
             jQuery( document ).ready( function() {
-                jQuery( '.options_group.pricing' ).addClass( 'show_if_custom_palette' ).show();
+                jQuery( '.options_group.pricing' ).addClass( 'show_if_<?php echo $this->slug; ?>' ).show();
                 jQuery('.show_if_simple').addClass('show_if_<?php echo $this->slug; ?>' );
             });
 		</script><?php
