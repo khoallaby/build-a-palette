@@ -22,3 +22,42 @@ body.woocommerce #content #main div.summary { float: none; width: 100%; }
     .custom-palette-colors > ul > li.ui-state-hover a { color: white !important; }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*********MOBILE SIZES**********/
+
+@media screen and (max-width: 1030px) {
+
+
+
+}
+
+@media screen and (max-width: 768px) {
+
+
+}
+
+@media screen and (max-width: 481px) {
+
+}
