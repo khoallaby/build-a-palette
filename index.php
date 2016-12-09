@@ -17,3 +17,11 @@ if( !class_exists('base_plugin') )
 
 require_once( dirname( __FILE__ ) . '/lib/class.gabriel.php' );
 add_action( 'init', array(gabriel::get_instance(), 'init') );
+
+
+
+function vard( $it ) {
+	echo '<pre>';
+	var_dump($it);
+	echo '</pre>';
+}

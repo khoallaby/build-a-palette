@@ -7,6 +7,7 @@ if( !class_exists('base_plugin') )
 
 class gabriel extends base_plugin {
 	public $slug = 'simple';
+	public $palette_metakey = '_palette_product_id';
 	public $object_types = array('post', 'page');
 
     protected function __construct() {
@@ -27,7 +28,7 @@ class gabriel extends base_plugin {
 	    add_action( 'admin_footer', array( $this, 'custom_palette_custom_js' ) );
 	    add_filter( 'woocommerce_product_data_tabs', array( $this, 'custom_product_tabs' ) );
 	    add_action( 'woocommerce_product_data_panels', array( $this, 'custom_palette_options_product_tab_content' ) );
-	    add_action( 'woocommerce_process_product_meta_custom_palette', array( $this, 'save_custom_palette_option_field'  ) );
+	    add_action( 'woocommerce_process_product_meta_' . $this->slug, array( $this, 'save_custom_palette_option_field'  ) );
 	    add_filter( 'woocommerce_product_data_tabs', array( $this, 'hide_attributes_data_panel' ) );
 
 
@@ -69,7 +70,8 @@ class gabriel extends base_plugin {
 	public function modify_product_page() {
 		if( is_product() ) {
 			$product = wc_get_product( );
-			if( $product  && $product->product_type == $this->slug ) {
+			$product_palette_id = get_post_meta($product->id, $this->palette_metakey, true);
+			if( $product  && $product_palette_id ) {
 				#remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_images', 20 );
 				#add_action( 'woocommerce_before_single_product_summary', array ( $this, 'custom_palette_template' ), 30 );
 				remove_all_actions( 'woocommerce_product_thumbnails' );
@@ -106,12 +108,10 @@ class gabriel extends base_plugin {
 
 	public function woocommerce_display_swatches( $product_id ) {
 
-		$product_palette_id = get_post_meta($product_id, '_palette_product_id', true);
+		$product_palette_id = get_post_meta($product_id, $this->palette_metakey, true);
 		$product_palette = new WC_Product_Variable( $product_palette_id );
 
 		$get_variations = sizeof( $product_palette->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product_palette );
-
-
 		$attributes = $product_palette->get_variation_attributes();
 		$attribute = $attribute_keys = array_shift(array_keys( $attributes ));
 
@@ -129,7 +129,7 @@ class gabriel extends base_plugin {
 				}
 
 				do_action( 'woocommerce_swatches_before_picker_item', $swatch_term );
-				echo $swatch_term->get_output();
+				echo $this-> woocommerce_output_swatch( $swatch_term, $product_palette );
 				do_action( 'woocommerce_swatches_after_picker_item', $swatch_term );
 			}
 		}
@@ -137,6 +137,66 @@ class gabriel extends base_plugin {
     }
 
 
+
+    /**
+     * Pulled from WC_Swatch_Term->get_output()
+     * Outputs individual swatch div with the variation image, as a data-attribute, for hover purposes
+     */
+	public function woocommerce_output_swatch( $swatch_term, $product_palette ) {
+		global $product;
+
+		$picker = '';
+
+		$href = apply_filters( 'woocommerce_swatches_get_swatch_href', '#', $swatch_term );
+		$anchor_class = apply_filters( 'woocommerce_swatches_get_swatch_anchor_css_class', 'swatch-anchor', $swatch_term );
+		$image_class = apply_filters( 'woocommerce_swatches_get_swatch_image_css_class', 'swatch-img', $swatch_term );
+		$image_alt = apply_filters( 'woocommerce_swatches_get_swatch_image_alt', 'thumbnail', $swatch_term );
+
+		if ( $swatch_term->type == 'photo' || $swatch_term->type == 'image' ) {
+			$picker .= '<a href="' . $href . '" style="width:' . $swatch_term->width . 'px;height:' . $swatch_term->height . 'px;" title="' . esc_attr( $swatch_term->term_label ) . '" class="' . $anchor_class . '">';
+			$picker .= '<img src="' . apply_filters( 'woocommerce_swatches_get_swatch_image', $swatch_term->thumbnail_src, $swatch_term->term_slug, $swatch_term->taxonomy_slug, $swatch_term ) . '" alt="' . $image_alt . '" class="wp-post-image swatch-photo' . $swatch_term->meta_key() . ' ' . $image_class . '" width="' . $swatch_term->width . '" height="' . $swatch_term->height . '"/>';
+			$picker .= '</a>';
+		} elseif ( $swatch_term->type == 'color' ) {
+			$picker .= '<a href="' . $href . '" style="text-indent:-9999px;width:' . $swatch_term->width . 'px;height:' . $swatch_term->height . 'px;background-color:' . apply_filters( 'woocommerce_swatches_get_swatch_color', $swatch_term->color, $swatch_term->term_slug, $swatch_term->taxonomy_slug, $swatch_term ) . ';" title="' . $swatch_term->term_label . '" class="' . $anchor_class . '">' . $swatch_term->term_label . '</a>';
+			$picker .= '</a>';
+		} else {
+            $src = apply_filters( 'woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png' );
+			$picker .= '<a href="' . $href . '" style="width:' . $swatch_term->width . 'px;height:' . $swatch_term->height . 'px;" title="' . esc_attr( $swatch_term->term_label ) . '"  class="' . $anchor_class . '">';
+			$picker .= '<img src="' . $src . '" alt="' . $image_alt . '" class="wp-post-image swatch-photo' . $swatch_term->meta_key() . ' ' . $image_class . '" width="' . $swatch_term->width . '" height="' . $swatch_term->height . '"/>';
+			$picker .= '</a>';
+		}
+
+
+
+		# /woocommerce/includes/class-ws-ajax.php -- WC_AJAX::get_variation()
+        // gets variation
+		if ( empty( $product_palette->id ) || ! ( $variable_product = wc_get_product( absint( $product_palette->id ), array( 'product_type' => 'variable' ) ) ) ) {
+			$variation = false;
+		} else {
+            $variation_data = array(
+                'attribute_pa_color' => $swatch_term->term_slug,
+                'product_id' => $product_palette->id
+            );
+            $variation_id = $variable_product->get_matching_variation( wp_unslash( $variation_data ) );
+
+            $variation = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
+		}
+
+
+		$out = sprintf('<div class="select-option swatch-wrapper %s" data-attribute="%s" data-value="%s" data-thumbnail="%s" data-variation-id="%d" data-sku="%s">',
+           ($swatch_term->selected ? ' selected' : ''),
+            esc_attr( $swatch_term->taxonomy_slug ),
+            esc_attr( $swatch_term->term_slug ),
+			$variation ? esc_attr( $variation['image_src'] ): '',
+			$variation ? esc_attr( $variation['variation_id'] ): '',
+			$variation ? esc_attr( $variation['sku'] ): ''
+        );
+		$out .= apply_filters( 'woocommerce_swatches_picker_html', $picker, $swatch_term );
+		$out .= '</div>';
+
+
+		return $out;
+	}
 
 
 
@@ -210,9 +270,9 @@ class gabriel extends base_plugin {
 
 		echo '<div id="' . $this->slug . '_options" class="panel woocommerce_options_panel">';
 		echo '<div class="options_group">';
-		$palette_product_id = get_post_meta($post->ID, '_palette_product_id', true);
+		$palette_product_id = get_post_meta($post->ID, $this->palette_metakey, true);
 		woocommerce_wp_select( array(
-			'id' 		=> '_palette_product_id',
+			'id' 		=> $this->palette_metakey,
 			'label' 	=> __( 'Product to pull colors from:', 'woocommerce' ),
             'value'     => $palette_product_id,
             'options'   => $this->get_all_wc_products()
@@ -227,8 +287,8 @@ class gabriel extends base_plugin {
 	 * Save the custom fields.
 	 */
 	function save_custom_palette_option_field( $post_id ) {
-		if ( isset( $_POST['_palette_product_id'] ) )
-            update_post_meta( $post_id, '_palette_product_id', sanitize_text_field( $_POST['_palette_product_id'] ) );
+		if ( isset( $_POST[$this->palette_metakey] ) )
+            update_post_meta( $post_id, $this->palette_metakey, sanitize_text_field( $_POST[$this->palette_metakey] ) );
 
 	}
 
@@ -301,6 +361,12 @@ class gabriel extends base_plugin {
 
 		return $return;
 
+    }
+
+
+    public function get_product_variations( $product_id ) {
+	    $product_variable = new WC_Product_Variable( $product_id );
+	    return $product_variable->get_available_variations();
     }
 
 
