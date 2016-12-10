@@ -4,7 +4,8 @@ body pre { white-space: pre !important; }
 .product-type-custom_palette { }
 
 body.woocommerce #content #main div.images { float: none !important; margin-bottom: 0; text-align: center; width: 100% !important; }
-body.woocommerce #content #main div.images img.wp-post-image { display: inline; width: auto; }
+body.woocommerce #content #main div.images img.custom-palette-image { display: inline; width: auto; }
+body.woocommerce #content #main div.images img.custom-palette-swatch { position: absolute; }
 
 
 body.woocommerce #content #main div.summary { float: none; width: 100%; }
