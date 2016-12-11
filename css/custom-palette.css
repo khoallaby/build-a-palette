@@ -69,5 +69,8 @@ body.woocommerce #content #main div.summary { float: none; width: 100%; }
 }
 
 @media screen and (max-width: 481px) {
-
+    .custom-palette-color .swatch-wrapper img,
+    .custom-palette-color .swatch-wrapper { height: 44px !important; width: 60px !important; padding: 0px !important; }
+    .custom-palette-color .swatch-wrapper:nth-child(4n+1){ margin-left: 5px; }
+    .custom-palette-colors > ul > li { font-size: .79em; }
 }
