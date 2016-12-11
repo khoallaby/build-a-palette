@@ -33,8 +33,11 @@ class gabriel extends base_plugin {
 
 
 
+	    wp_register_script( 'fabric', plugins_url( 'js/fabric.min.js', dirname(__FILE__) ) );
+	    #wp_register_script( 'fabric', 'http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.1/fabric.min.js' );
 	    wp_register_script( 'custom-palette', plugins_url( 'js/custom-palette.js', dirname(__FILE__) ), array( 'jquery-ui-core', 'jquery-ui-tabs' ), '1.0', true );
 	    wp_register_style( 'custom-palette', plugins_url( 'css/custom-palette.css', dirname(__FILE__) ) );
+
 
     }
 
@@ -84,6 +87,9 @@ class gabriel extends base_plugin {
 				#remove_action( 'woocommerce_product_thumbnails', 'woocommerce_show_product_thumbnails', 20 );
 				add_filter( 'woocommerce_single_product_image_html', array( $this, 'woocommerce_single_product_image_html' ), 10, 1 );
 				add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'woocommerce_add_hidden_fields' ) );
+
+
+				add_action('woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ) );
 			}
 		}
 	}
@@ -95,6 +101,7 @@ class gabriel extends base_plugin {
 	 *************************************************/
 
 	public function enqueue_custom_palette_scripts() {
+		wp_enqueue_script( 'fabric' );
 		wp_enqueue_style( 'custom-palette' );
 		wp_enqueue_script( 'custom-palette' );
     }
@@ -129,7 +136,13 @@ class gabriel extends base_plugin {
                 'class' => 'custom-palette-image'
 			) );
 
-			return $image;
+
+			$image_prop = wp_get_attachment_image_src( get_post_thumbnail_id(), apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ) );
+			//$html = '<canvas id="custom-palette-canvas" width="' . $image_prop[1] . '" height="' . $image_prop[2] . '" style="background-image: url(\'' . $image_prop[0] . '\');"></canvas>';
+
+			$html = '<canvas id="custom-palette-canvas" width="' . $image_prop[1] . '" height="' . $image_prop[2] . '"></canvas>';
+			#$html = '<canvas id="custom-palette-canvas"></canvas>';
+			#$html .= $image;
 			/*
 			return sprintf(
 				'<a href="%s" itemprop="image" class="woocommerce-main-image zoom" title="%s" data-rel="prettyPhoto%s">%s</a>',
@@ -140,8 +153,10 @@ class gabriel extends base_plugin {
 			);
 			*/
 		} else {
-            return sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) );
+            $html .= sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) );
         }
+
+        return $html;
 	}
 
 
