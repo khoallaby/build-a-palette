@@ -9,10 +9,10 @@
         _palette_image: null,
         _palette_image_container: null,
         coords: [
-            { x: 27, y: 45 },
-            { x: 127, y: 45 },
-            { x: 227, y: 45 },
-            { x: 327, y: 45 }
+            { x: 28, y: 46 },
+            { x: 128, y: 46 },
+            { x: 228, y: 46 },
+            { x: 328, y: 46 }
 
         ],
 
@@ -44,11 +44,9 @@
             var image_url = 'http://magencydev.com/gabriel/media/2016/03/palette.jpg';
 
             // todo: remove canvas global
-            this._canvas = canvas = new fabric.Canvas( 'custom-palette-canvas', {
+            this._canvas = canvas = new fabric.StaticCanvas( 'custom-palette-canvas', {
                 backgroundImage: image_url
             });
-            //this._canvas.setBackgroundImage( image_url );
-
 
         },
 
@@ -59,7 +57,11 @@
 
             this._child.find('.swatch-img').click( function(e) {
                 e.preventDefault();
-                var swatch_data = $(this).parents('.swatch-wrapper').data();
+                var swatch_wrapper = $(this).parents('.swatch-wrapper');
+                swatch_wrapper.parent().find('.swatch-wrapper').removeClass('selected');
+                swatch_wrapper.addClass('selected');
+
+                var swatch_data = swatch_wrapper.data();
                 var color_data = $(this).parents('.custom-palette-color').data();
 
                 $('form.cart input[name="cp_color_' + color_data.colorId  + '"]').val( swatch_data.variationId );
@@ -99,20 +101,19 @@
 
             fabric.Image.fromURL(image_url, function(obj) {
 
-                //obj.set({ left: positionLeft, top: positionTop, angle: positionAngle });
-                obj.scale(positionScale);
-                wc_custom_palette._canvas.add(obj.set({
+                obj.scale(positionScale).set({
                     id: 'cp_color_' + (index),
 
                     left: positionLeft,
                     top: positionTop,
                     height: positionHeight,
-                    width: positionWidth
-                    /*
+                    width: positionWidth,
                     clipTo: function (ctx) {
-                        ctx.arc(0, 0, 98, 0, Math.PI * 2, true);
-                    }*/
-                }));
+                        var radius = 46;
+                        ctx.arc(0, 0, radius, 0, Math.PI * 2, true);
+                    }
+                });
+                wc_custom_palette._canvas.add( obj );
                 //wc_custom_palette._canvas.item(ni).scale(positionScale);
                 //wc_custom_palette._canvas.renderAll();
                 //wc_custom_palette._canvas.calcOffset();
