@@ -33,11 +33,21 @@ class gabriel extends base_plugin {
 
 
 
-	    wp_register_script( 'fabric', plugins_url( 'js/fabric.min.js', dirname(__FILE__) ) );
-	    #wp_register_script( 'fabric', 'http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.1/fabric.min.js' );
-	    wp_register_script( 'custom-palette', plugins_url( 'js/custom-palette.js', dirname(__FILE__) ), array( 'jquery-ui-core', 'jquery-ui-tabs' ), '1.0', true );
-	    wp_register_style( 'custom-palette', plugins_url( 'css/custom-palette.css', dirname(__FILE__) ) );
 
+
+	    #add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 1, 6 );
+	    #add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'woocommerce_add_to_cart_validation', 10, 5 ) );
+
+
+	    add_filter( 'woocommerce_add_cart_item', array( $this, 'woocommerce_add_cart_item' ) );
+	    add_filter( 'woocommerce_cart_item_name', array( $this, 'woocommerce_cart_item_name' ), 10, 2 );
+	    //add_filter( 'woocommerce_get_item_data', array( $this, 'woocommerce_get_item_data'), 10, 2 );
+
+	    # potentially add filter to change prices
+        # https://github.com/woocommerce/woocommerce/issues/4135#issuecomment-28843229
+        # or
+        # http://sarkware.com/woocommerce-change-product-price-dynamically-while-adding-to-cart-without-using-plugins/
+	    #add_filter( 'woocommerce_get_cart_item_from_session', array( $this,'woocommerce_get_cart_item_from_session', 5, 3 ) );
 
     }
 
@@ -88,8 +98,8 @@ class gabriel extends base_plugin {
 				add_filter( 'woocommerce_single_product_image_html', array( $this, 'woocommerce_single_product_image_html' ), 10, 1 );
 				add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'woocommerce_add_hidden_fields' ) );
 
-
-				add_action('woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ) );
+                add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 10, 6 );
+				#add_action( 'woocommerce_add_to_cart', array( &$this, 'add_product_to_cart'), 10, 6 );
 			}
 		}
 	}
@@ -101,6 +111,11 @@ class gabriel extends base_plugin {
 	 *************************************************/
 
 	public function enqueue_custom_palette_scripts() {
+		wp_register_script( 'fabric', plugins_url( 'js/fabric.min.js', dirname(__FILE__) ) );
+		#wp_register_script( 'fabric', 'http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.1/fabric.min.js' );
+		wp_register_script( 'custom-palette', plugins_url( 'js/custom-palette.js', dirname(__FILE__) ), array( 'jquery-ui-core', 'jquery-ui-tabs' ), '1.0', true );
+		wp_register_style( 'custom-palette', plugins_url( 'css/custom-palette.css', dirname(__FILE__) ) );
+
 		wp_enqueue_script( 'fabric' );
 		wp_enqueue_style( 'custom-palette' );
 		wp_enqueue_script( 'custom-palette' );
@@ -117,7 +132,7 @@ class gabriel extends base_plugin {
 		$max_colors = 4;
 
 		foreach( range(1, $max_colors) as $i )
-            echo '<input type="hidden" value="' . ($_REQUEST["cp_color_{$i}"] ? esc_attr($_REQUEST["cp_color_{$i}"]) : '') . '" name="cp_color_' . $i . '" />';
+            echo '<input type="hidden" value="' . (null !== $_REQUEST["cp_color_{$i}"] ? esc_attr($_REQUEST["cp_color_{$i}"]) : '') . '" name="cp_color_' . $i . '" />';
         #$this->wc_get_template( 'single-product/product-thumbnails.php' );
 	}
 
@@ -127,6 +142,7 @@ class gabriel extends base_plugin {
         $product = new WC_Product( $post_id );
 
 		if ( has_post_thumbnail() ) {
+		    /*
 			$attachment_count = count( $product->get_gallery_attachment_ids() );
 			$gallery          = $attachment_count > 0 ? '[product-gallery]' : '';
 			$props            = wc_get_product_attachment_props( get_post_thumbnail_id(), $post );
@@ -135,6 +151,7 @@ class gabriel extends base_plugin {
 				'alt'   => $props['alt'],
                 'class' => 'custom-palette-image'
 			) );
+		    */
 
 
 			$image_prop = wp_get_attachment_image_src( get_post_thumbnail_id(), apply_filters( 'single_product_large_thumbnail_size', 'shop_single' ) );
@@ -178,10 +195,11 @@ class gabriel extends base_plugin {
 
 		foreach ( $terms as $term ) {
 			if ( in_array( $term->slug, $attributes[$attribute] ) ) {
+			    $selected = false;
 				if ( $config->get_type() == 'term_options' ) {
-					$swatch_term = new WC_Swatch_Term( $config, $term->term_id, $attribute, $args['selected'] == $term->slug, $config->get_size() );
+					$swatch_term = new WC_Swatch_Term( $config, $term->term_id, $attribute, $selected == $term->slug, $config->get_size() );
 				} elseif ( $config->get_type() == 'product_custom' ) {
-					$swatch_term = new WC_Product_Swatch_Term( $config, $term->term_id, $attribute, $args['selected'] == $term->slug, $config->get_size() );
+					$swatch_term = new WC_Product_Swatch_Term( $config, $term->term_id, $attribute, $selected == $term->slug, $config->get_size() );
 				}
 
 				do_action( 'woocommerce_swatches_before_picker_item', $swatch_term );
@@ -253,6 +271,148 @@ class gabriel extends base_plugin {
 
 		return $out;
 	}
+
+
+
+	function woocommerce_add_to_cart_validation( $passed, $product_id, $quantity, $variation_id = '', $variations= '' ) {
+
+	    return $passed;
+
+	}
+
+	/**
+	 * Logic of adding our custom product to the cart
+	 */
+	function woocommerce_add_to_cart( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
+
+		//$this->add_custom_product();
+	    /*
+		if( isset($cart_item_data['fpd_data']) ) {
+
+			//check if an old cart item exist
+			if( !empty($cart_item_data['fpd_data']['fpd_remove_cart_item']) ) {
+
+				global $woocommerce;
+				$woocommerce->cart->set_quantity($cart_item_data['fpd_data']['fpd_remove_cart_item'], 0);
+
+			}
+		}
+		*/
+        global $woocommerce;
+
+		die();
+
+		$product_id = $_POST['assessories'];
+
+		$found = false;
+
+		//check if product already in cart
+		if ( sizeof( WC()->cart->get_cart() ) > 0 ) {
+			foreach ( WC()->cart->get_cart() as $cart_item_key => $values ) {
+				$_product = $values['data'];
+				if ( $_product->id == $product_id )
+					$found = true;
+			}
+			// if product not found, add it
+			if ( ! $found )
+				WC()->cart->add_to_cart( $product_id );
+		} else {
+			// if no products in cart, add it
+			WC()->cart->add_to_cart( $product_id );
+		}
+	}
+
+
+
+
+
+
+
+
+
+	/*************************************************
+	 * Functions for dealing with displaying the new color attributes
+	 *************************************************/
+
+	/*
+	 * Format for how the attributes should look
+	 */
+	public function woocommerce_add_cart_item( $cart_item_data ) {
+		$max_colors = 4;
+
+		foreach( range(1, $max_colors) as $i ) {
+			if( $variation_id = $_REQUEST['cp_color_' . $i] ) {
+				$variation_data = $this->get_product_variation_data($variation_id);
+				$cart_item_data['variation']['Color ' . $i] = sprintf( '%s (%s)',  $variation_data['term_name'], $variation_data['sku'] );
+			}
+		}
+
+
+		return $cart_item_data;
+	}
+
+	public function woocommerce_get_cart_item_from_session( $cart_item_data, $values, $key ) {
+		#$cart_item_data->set_price(200);
+		return $cart_item_data;
+	}
+
+	/*
+	 * Shows custom attributes under each product on cart page
+	 */
+	public function woocommerce_cart_item_name( $cart_item, $cart_item_key ) {
+		$out = $cart_item;
+		$product_palette_id = get_post_meta($cart_item_key['product_id'], $this->palette_metakey, true);
+
+		if( $product_palette_id ) {
+			if( !empty($cart_item_key['variation']) ) {
+				$out .= '<dl class="variation">';
+				foreach( $cart_item_key['variation'] as $attribute_slug => $attribute_name ) {
+					$short_slug = str_replace(' ' , '-', strtolower($attribute_slug) );
+					$out .= '
+                        <dt class="variation-' . $short_slug . '">' . $attribute_slug . ':</dt>
+                        <dd class="variation-' . $short_slug . '"><p>' . $attribute_name . '</p></dd>
+                    ';
+				}
+				$out .= '</dl>';
+
+			}
+		}
+
+		return $out;
+	}
+
+
+
+
+	function woocommerce_get_item_data( $other_data, $cart_item ) {
+
+
+		return $other_data;
+
+	}
+
+
+
+
+	public function get_product_variation_data( $variation_id ) {
+		$data = array();
+		#$data['product_variation'] = new WC_Product_Variation( $variation_id );
+		$data['sku'] = get_post_meta( $variation_id, '_sku', 'true' );
+		$data['price'] = get_post_meta( $variation_id, '_price', 'true' );
+		$data['term_slug'] = get_post_meta( $variation_id, 'attribute_pa_color', 'true' );
+		$data['term'] = get_term_by( 'slug', $data['term_slug'], 'pa_color' );
+		$data['term_name'] = $data['term']->name;
+		return $data;
+	}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -389,12 +549,15 @@ class gabriel extends base_plugin {
 
 		global $woocommerce;
 		$variations = array(
-			'color'     => 'green',
-			'palette 1' => 'color 1',
-			'palette 2' => 'color 2',
+			'Color'     => 'green',
+			'palette 1' => 'color 1 adsfljdaslfj s',
+			'palette 2' => 'color 2 asdfs dfs',
 			'palette 3' => 'color 3',
 		);
 		#$woocommerce->cart->add_to_cart( 16661, 1, 0, $variations, array() );
+		#$woocommerce->cart->add_to_cart( 23452, 1, 0, $variations, array() );
+
+		//$woocommerce->cart->add_to_cart( 16679, 1, 16760, $variations, array() );
 
     }
 
@@ -453,3 +616,75 @@ class gabriel extends base_plugin {
 
 }
 
+/**
+ * WooCommerce: show all product attributes listed below each item on Cart page
+ */
+function isa_woo_cart_attributes($cart_item, $cart_item_key){
+
+	$item_data = $cart_item_key['data'];
+	$attributes = $item_data->get_attributes();
+
+
+	if( $item_data->ID ) {
+	    $palette_product_id = get_post_meta($item_data->ID, $this->palette_metakey, true);
+
+
+	    $product = new WC_Product_Variable( $palette_product_id);
+	    $attributes = $product->get_attributes();
+
+    }
+	vard($item_data);
+
+
+
+	if ( ! $attributes ) {
+		return $cart_item;
+	}
+
+	$out = $cart_item . '<br />';
+
+	foreach ( $attributes as $attribute ) {
+
+		if ( $attribute['is_taxonomy'] ) {
+
+			// skip variations
+            /*
+			if ( $attribute['is_variation'] ) {
+				continue;
+			}*/
+
+			// backwards compatibility for attributes which are registered as taxonomies
+
+			$product_id = $item_data->id;
+			$terms = wp_get_post_terms( $product_id, $attribute['name'], 'all' );
+
+			// get the taxonomy
+			$tax = $terms[0]->taxonomy;
+
+			// get the tax object
+			$tax_object = get_taxonomy($tax);
+
+			// get tax label
+			if ( isset ($tax_object->labels->name) ) {
+				$tax_label = $tax_object->labels->name;
+			} elseif ( isset( $tax_object->label ) ) {
+				$tax_label = $tax_object->label;
+			}
+
+			foreach ( $terms as $term ) {
+				$out .= $tax_label . ': ';
+				$out .= $term->name . '<br />';
+			}
+
+		} else {
+
+			// not a taxonomy
+
+			$out .= $attribute['name'] . ': ';
+			$out .= $attribute['value'] . '<br />';
+		}
+	}
+	echo $out;
+}
+
+//add_filter( 'woocommerce_cart_item_name', 'isa_woo_cart_attributes', 10, 2 );
