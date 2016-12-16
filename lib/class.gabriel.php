@@ -35,13 +35,16 @@ class gabriel extends base_plugin {
 
 
 
-	    #add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 1, 6 );
+	    add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 1, 6 );
 	    #add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'woocommerce_add_to_cart_validation', 10, 5 ) );
 
 
-	    add_filter( 'woocommerce_add_cart_item', array( $this, 'woocommerce_add_cart_item' ) );
+	    add_filter( 'woocommerce_add_cart_item_data', array( $this, 'woocommerce_add_cart_item' ), 10, 3 );
+	    add_filter( 'woocommerce_add_cart_item', array( $this, 'woocommerce_add_cart_item' ), 10, 3 );
 	    add_filter( 'woocommerce_cart_item_name', array( $this, 'woocommerce_cart_item_name' ), 10, 2 );
 	    //add_filter( 'woocommerce_get_item_data', array( $this, 'woocommerce_get_item_data'), 10, 2 );
+
+
 
 	    # potentially add filter to change prices
         # https://github.com/woocommerce/woocommerce/issues/4135#issuecomment-28843229
@@ -98,7 +101,7 @@ class gabriel extends base_plugin {
 				add_filter( 'woocommerce_single_product_image_html', array( $this, 'woocommerce_single_product_image_html' ), 10, 1 );
 				add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'woocommerce_add_hidden_fields' ) );
 
-                add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 10, 6 );
+                #add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 10, 6 );
 				#add_action( 'woocommerce_add_to_cart', array( &$this, 'add_product_to_cart'), 10, 6 );
 			}
 		}
@@ -170,7 +173,7 @@ class gabriel extends base_plugin {
 			);
 			*/
 		} else {
-            $html .= sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) );
+            $html = sprintf( '<img src="%s" alt="%s" />', wc_placeholder_img_src(), __( 'Placeholder', 'woocommerce' ) );
         }
 
         return $html;
@@ -284,6 +287,7 @@ class gabriel extends base_plugin {
 	 * Logic of adding our custom product to the cart
 	 */
 	function woocommerce_add_to_cart( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
+	    return $cart_item_key;
 
 		//$this->add_custom_product();
 	    /*
@@ -337,8 +341,9 @@ class gabriel extends base_plugin {
 	/*
 	 * Format for how the attributes should look
 	 */
-	public function woocommerce_add_cart_item( $cart_item_data ) {
+	public function woocommerce_add_cart_item( $cart_item_data, $product_id, $variation_id ) {
 		$max_colors = 4;
+		$cart_item_data['variation'] = array();
 
 		foreach( range(1, $max_colors) as $i ) {
 			if( $variation_id = $_REQUEST['cp_color_' . $i] ) {
@@ -404,12 +409,6 @@ class gabriel extends base_plugin {
 		$data['term_name'] = $data['term']->name;
 		return $data;
 	}
-
-
-
-
-
-
 
 
 
