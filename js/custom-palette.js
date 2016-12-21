@@ -66,6 +66,9 @@
 
                 $('form.cart input[name="cp_color_' + color_data.colorId  + '"]').val( swatch_data.variationId );
                 _this.changeImage( color_data.colorId, swatch_data.thumbnail );
+                // display color name in label
+                $(this).parents('.custom-palette-color').find('.custom-palette-color-label').html( $(this).parent().attr('title') );
+
 
             });
 

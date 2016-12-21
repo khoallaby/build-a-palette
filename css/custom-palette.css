@@ -19,7 +19,7 @@ body.woocommerce #content #main div.summary { float: none; width: 100%; }
 
 
 .custom-palette-colors { }
-    .custom-palette-colors > ul { margin: 30px 0; }
+    .custom-palette-colors > ul { margin: 30px 0 10px; }
     .custom-palette-colors > ul > li { display: inline-block; padding: 5px 10px; }
     .custom-palette-colors > ul > li a { color: black; }
     .custom-palette-colors > ul > li.ui-state-active,

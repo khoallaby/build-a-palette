@@ -40,9 +40,8 @@ $max_colors = 4;
 
 	<?php foreach( range(1, $max_colors) as $i ) { ?>
     <div id="custom-palette-color-<?php echo $i; ?>" class="custom-palette-color" data-color-id="<?php echo $i;?>">
-        <?php
-        $gabriel->woocommerce_display_swatches( $product->id );
-        ?>
+        <div class="custom-palette-color-label swatch-label">&nbsp;</div>
+        <?php $gabriel->woocommerce_display_swatches( $product->id ); ?>
     </div>
     <?php } ?>
 
