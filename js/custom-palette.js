@@ -9,9 +9,9 @@
         _palette_image: null,
         _palette_image_container: null,
         coords: [
-            { x: 28, y: 46 },
-            { x: 128, y: 46 },
-            { x: 228, y: 46 },
+            { x: 27, y: 46 },
+            { x: 127, y: 46 },
+            { x: 227, y: 46 },
             { x: 328, y: 46 }
 
         ],
@@ -40,11 +40,10 @@
 
 
         setupCanvas : function() {
-            // todo: remove hardcoded background
-            var image_url = 'http://magencydev.com/gabriel/media/2016/03/palette.jpg';
+            var _image_container = $('.custom-palette-image');
+            _image_container.remove();
 
-            // todo: remove canvas global
-            this._canvas = canvas = new fabric.StaticCanvas( 'custom-palette-canvas', {
+            this._canvas = new fabric.StaticCanvas( 'custom-palette-canvas', {
                 backgroundImage: image_url
             });
 
