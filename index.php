@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Build a Palette
-Plugin URI: http://www.gabrielcosmetics.com
+Plugin URI: http://www.gabrielcosmeticsinc.com
 Description: Build a customized palette using existing swatches from other products.
-Author: Andy Nguyen
+Author: M Agency
 Version: 1.0
 Author URI: http://www.whatisyourm.com
 */
@@ -19,9 +19,3 @@ require_once( dirname( __FILE__ ) . '/lib/class.gabriel.php' );
 add_action( 'init', array(gabriel::get_instance(), 'init') );
 
 
-
-function vard( $it ) {
-	echo '<pre>';
-	var_dump($it);
-	echo '</pre>';
-}
