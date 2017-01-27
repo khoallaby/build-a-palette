@@ -41,6 +41,7 @@
 
         setupCanvas : function() {
             var _image_container = $('.custom-palette-image');
+            var image_url = _image_container.html();
             _image_container.remove();
 
             this._canvas = new fabric.StaticCanvas( 'custom-palette-canvas', {
