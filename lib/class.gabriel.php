@@ -289,7 +289,6 @@ class gabriel extends base_plugin {
 	function woocommerce_add_to_cart( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 	    return $cart_item_key;
 
-		//$this->add_custom_product();
 	    /*
 		if( isset($cart_item_data['fpd_data']) ) {
 
@@ -550,22 +549,6 @@ class gabriel extends base_plugin {
 	 * WooCommerce functions
 	 *************************************************/
 
-	public function add_custom_product() {
-
-		global $woocommerce;
-		$variations = array(
-			'Color'     => 'green',
-			'palette 1' => 'color 1 adsfljdaslfj s',
-			'palette 2' => 'color 2 asdfs dfs',
-			'palette 3' => 'color 3',
-		);
-		#$woocommerce->cart->add_to_cart( 16661, 1, 0, $variations, array() );
-		#$woocommerce->cart->add_to_cart( 23452, 1, 0, $variations, array() );
-
-		//$woocommerce->cart->add_to_cart( 16679, 1, 16760, $variations, array() );
-
-    }
-
 	public function get_all_wc_products() {
 
 		$args = array(
@@ -625,76 +608,3 @@ class gabriel extends base_plugin {
 
 
 }
-
-/**
- * WooCommerce: show all product attributes listed below each item on Cart page
- */
-function isa_woo_cart_attributes($cart_item, $cart_item_key){
-
-	$item_data = $cart_item_key['data'];
-	$attributes = $item_data->get_attributes();
-
-
-	if( $item_data->ID ) {
-	    $palette_product_id = get_post_meta($item_data->ID, $this->palette_metakey, true);
-
-
-	    $product = new WC_Product_Variable( $palette_product_id);
-	    $attributes = $product->get_attributes();
-
-    }
-	vard($item_data);
-
-
-
-	if ( ! $attributes ) {
-		return $cart_item;
-	}
-
-	$out = $cart_item . '<br />';
-
-	foreach ( $attributes as $attribute ) {
-
-		if ( $attribute['is_taxonomy'] ) {
-
-			// skip variations
-            /*
-			if ( $attribute['is_variation'] ) {
-				continue;
-			}*/
-
-			// backwards compatibility for attributes which are registered as taxonomies
-
-			$product_id = $item_data->id;
-			$terms = wp_get_post_terms( $product_id, $attribute['name'], 'all' );
-
-			// get the taxonomy
-			$tax = $terms[0]->taxonomy;
-
-			// get the tax object
-			$tax_object = get_taxonomy($tax);
-
-			// get tax label
-			if ( isset ($tax_object->labels->name) ) {
-				$tax_label = $tax_object->labels->name;
-			} elseif ( isset( $tax_object->label ) ) {
-				$tax_label = $tax_object->label;
-			}
-
-			foreach ( $terms as $term ) {
-				$out .= $tax_label . ': ';
-				$out .= $term->name . '<br />';
-			}
-
-		} else {
-
-			// not a taxonomy
-
-			$out .= $attribute['name'] . ': ';
-			$out .= $attribute['value'] . '<br />';
-		}
-	}
-	echo $out;
-}
-
-//add_filter( 'woocommerce_cart_item_name', 'isa_woo_cart_attributes', 10, 2 );
