@@ -29,6 +29,12 @@ body.woocommerce #content #main div.summary { float: none; width: 100%; }
     .custom-palette-colors > ul > li.ui-state-focus a,
     .custom-palette-colors > ul > li.ui-state-hover a { color: white !important; }
 
+    /* prevent FOUC */
+    #custom-palette-color-2,
+    #custom-palette-color-3,
+    #custom-palette-color-4 { display: none; }
+
+
 
 
 
