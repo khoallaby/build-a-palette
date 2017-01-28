@@ -30,6 +30,7 @@ $gabriel = gabriel::get_instance();
 
 $max_colors = 4;
 ?>
+<div class="custom-palette-image" style="display: none;"><?php echo get_the_post_thumbnail_url(); ?></div>
 
 <div class="custom-palette-colors">
     <ul>
