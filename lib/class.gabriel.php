@@ -35,7 +35,7 @@ class gabriel extends base_plugin {
 
 
 
-	    add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 1, 6 );
+	    #add_action( 'woocommerce_add_to_cart', array( $this, 'woocommerce_add_to_cart' ), 1, 6 );
 	    #add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'woocommerce_add_to_cart_validation', 10, 5 ) );
 
 
@@ -342,31 +342,37 @@ class gabriel extends base_plugin {
 	 * Format for how the attributes should look
 	 */
 	public function woocommerce_add_cart_item( $cart_item_data, $product_id, $variation_id ) {
-		$max_colors = 4;
-		$cart_item_data['variation'] = array();
+		#$product_palette_id = $this->is_palette_product( $product_id );
 
-		foreach( range(1, $max_colors) as $i ) {
-			if( $variation_id = $_REQUEST['cp_color_' . $i] ) {
-				$variation_data = $this->get_product_variation_data($variation_id);
-				$cart_item_data['variation']['Color ' . $i] = sprintf( '%s (%s)',  $variation_data['term_name'], $variation_data['sku'] );
+		#if( $product_palette_id ) {
+        if( $_REQUEST['cp_color_1'] || $_REQUEST['cp_color_2'] || $_REQUEST['cp_color_3'] || $_REQUEST['cp_color_4'] ) {
+			$max_colors = 4;
+			$cart_item_data['variation'] = array();
+
+			foreach ( range( 1, $max_colors ) as $i ) {
+				if ( $variation_id = $_REQUEST[ 'cp_color_' . $i ] ) {
+					$variation_data                               = $this->get_product_variation_data( $variation_id );
+					$cart_item_data['variation'][ 'Color ' . $i ] = sprintf( '%s (%s)', $variation_data['term_name'], $variation_data['sku'] );
+				}
 			}
 		}
 
-
 		return $cart_item_data;
 	}
+
 
 	public function woocommerce_get_cart_item_from_session( $cart_item_data, $values, $key ) {
 		#$cart_item_data->set_price(200);
 		return $cart_item_data;
 	}
 
+
 	/*
 	 * Shows custom attributes under each product on cart page
 	 */
 	public function woocommerce_cart_item_name( $cart_item, $cart_item_key ) {
 		$out = $cart_item;
-		$product_palette_id = get_post_meta($cart_item_key['product_id'], $this->palette_metakey, true);
+		$product_palette_id = $this->is_palette_product( $cart_item_key['product_id'] );
 
 		if( $product_palette_id ) {
 			if( !empty($cart_item_key['variation']) ) {
@@ -611,6 +617,11 @@ class gabriel extends base_plugin {
 
 		wc_get_template( '/' . $file . '.php',$args = array(), $template_path = '', dirname( __FILE__ ) . '/../templates/woocommerce/' );
     }
+
+
+	public function is_palette_product( $product_id ) {
+		return get_post_meta( $product_id, $this->palette_metakey, true );
+	}
 
 
 }
