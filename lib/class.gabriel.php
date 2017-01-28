@@ -114,9 +114,9 @@ class gabriel extends base_plugin {
 	 *************************************************/
 
 	public function enqueue_custom_palette_scripts() {
-		wp_register_script( 'fabric', plugins_url( 'js/fabric.min.js', dirname(__FILE__) ) );
+		wp_register_script( 'fabric', plugins_url( 'js/fabric.min.js', dirname(__FILE__) ), array(), '1.7.1' );
 		#wp_register_script( 'fabric', 'http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.1/fabric.min.js' );
-		wp_register_script( 'custom-palette', plugins_url( 'js/custom-palette.js', dirname(__FILE__) ), array( 'jquery-ui-core', 'jquery-ui-tabs' ), '1.0', true );
+		wp_register_script( 'custom-palette', plugins_url( 'js/custom-palette.js', dirname(__FILE__) ), array( 'jquery-ui-core', 'jquery-ui-tabs' ), '1.0' );
 		wp_register_style( 'custom-palette', plugins_url( 'css/custom-palette.css', dirname(__FILE__) ) );
 
 		wp_enqueue_script( 'fabric' );
