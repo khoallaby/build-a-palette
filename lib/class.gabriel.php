@@ -520,17 +520,6 @@ class gabriel extends base_plugin {
 
 
 
-	/**
-	 * Uses custom template
-	 */
-	function add_to_cart() {
-		require_once( dirname( __FILE__ ) . '/../templates/custom-palette.php' );
-		#wc_get_template( 'single-product/add-to-cart/custom-palette.php',$args = array(), $template_path = '', untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/templates/' );
-	}
-
-
-
-
 
 
 
