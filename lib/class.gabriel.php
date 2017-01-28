@@ -22,7 +22,6 @@ class gabriel extends base_plugin {
 
 	    # Back end / Custom product type
 	    add_action( 'admin_enqueue_scripts', array( $this, 'admin_javascript' ), 10, 1 );
-	    #add_action( 'plugins_loaded', array( $this, 'register_custom_palette_product_type' ) );
 
 	    #add_filter( 'product_type_selector', array( $this, 'add_custom_palette_product' ) );
 	    add_action( 'admin_footer', array( $this, 'custom_palette_custom_js' ) );
@@ -431,14 +430,6 @@ class gabriel extends base_plugin {
 	 * Add Custom Palette functions to WC backend
 	 *************************************************/
 
-
-
-	/**
-	 * Register the custom product type after init
-	 */
-	function register_custom_palette_product_type() {
-		require_once( dirname( __FILE__ ) . '/class.gabriel-wc-custom-product-type.php' );
-	}
 
 	/**
 	 * Add to product type drop down.
